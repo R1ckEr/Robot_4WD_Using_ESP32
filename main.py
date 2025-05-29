@@ -48,18 +48,32 @@ def pagina_web():
 <body>
     <h1>Controle do Robô 🤖</h1>
     <div class="button-container">
-        <button class="btn-frente" onclick="sendCommand('frente')">Frente</button><br>
-        <button class="btn-esquerda" onclick="sendCommand('esquerda')">Esquerda</button>
-        <button class="btn-direita" onclick="sendCommand('direita')">Direita</button><br>
-        <button class="btn-tras" onclick="sendCommand('tras')">Trás</button>
+        <button class="btn-frente" onmousedown="startCommand('frente')" onmouseup="stopCommand()" ontouchstart="startCommand('frente')" ontouchend="stopCommand()">Frente</button><br>
+        <button class="btn-esquerda" onmousedown="startCommand('esquerda')" onmouseup="stopCommand()" ontouchstart="startCommand('esquerda')" ontouchend="stopCommand()">Esquerda</button>
+        <button class="btn-direita" onmousedown="startCommand('direita')" onmouseup="stopCommand()" ontouchstart="startCommand('direita')" ontouchend="stopCommand()">Direita</button><br>
+        <button class="btn-tras" onmousedown="startCommand('tras')" onmouseup="stopCommand()" ontouchstart="startCommand('tras')" ontouchend="stopCommand()">Trás</button>
     </div>
     <p id="status">Comando: Nenhum</p>
 
     <script>
-        function sendCommand(direction) {
+        var comandoInterval;
+        var chave = "SEGREDO123";  // Substitua pela sua chave real
+
+        function startCommand(direction) {
             document.getElementById('status').innerText = "Comando: " + direction.charAt(0).toUpperCase() + direction.slice(1);
+            clearInterval(comandoInterval);
+            comandoInterval = setInterval(function() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/comando?dir=" + direction + "&chave=" + chave, true);
+                xhr.send();
+            }, 200);
+        }
+
+        function stopCommand() {
+            clearInterval(comandoInterval);
+            document.getElementById('status').innerText = "Comando: Nenhum";
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/comando?dir=" + direction, true);
+            xhr.open("GET", "/comando?dir=parar&chave=" + chave, true);
             xhr.send();
         }
     </script>
