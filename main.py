@@ -46,7 +46,7 @@ def pagina_web():
     </style>
 </head>
 <body>
-    <h1>Controle do Robô 🤖</h1>
+    <h1>Controle do Robô </h1>
     <div class="button-container">
         <button class="btn-frente" onmousedown="startCommand('frente')" onmouseup="stopCommand()" ontouchstart="startCommand('frente')" ontouchend="stopCommand()">Frente</button><br>
         <button class="btn-esquerda" onmousedown="startCommand('esquerda')" onmouseup="stopCommand()" ontouchstart="startCommand('esquerda')" ontouchend="stopCommand()">Esquerda</button>
@@ -85,7 +85,7 @@ def pagina_web():
 # Configuração do Ponto de Acesso
 ap = network.WLAN(network.AP_IF)
 ap.active(True)
-ap.config(essid=SSID, password=PASSWORD)
+ap.config(essid=SSID, password=PASSWORD, authmode =3)
 
 while not ap.active():
     pass
