@@ -2,90 +2,60 @@
 import network
 import socket
 import time
+from machine import Pin, PWM
 
-# Configurações do Ponto de Acesso Wi-Fi
+# Velocidade padrão (0 a 65535)
+velocidade = 30000
+
+# Pinos dos motores com PWM (conforme tabela)
+# Ponte H 1
+IN1 = PWM(Pin(25), freq=1000)  # Motor A1
+IN2 = PWM(Pin(26), freq=1000)
+IN3 = PWM(Pin(27), freq=1000)  # Motor A2
+IN4 = PWM(Pin(13), freq=1000)
+# Ponte H 2
+IN5 = PWM(Pin(18), freq=1000)  # Motor B1
+IN6 = PWM(Pin(19), freq=1000)
+IN7 = PWM(Pin(21), freq=1000)  # Motor B2
+IN8 = PWM(Pin(22), freq=1000)
+
+# Funções de controle de movimento
+
+def parar():
+    IN1.duty_u16(0); IN2.duty_u16(0); IN3.duty_u16(0); IN4.duty_u16(0)
+    IN5.duty_u16(0); IN6.duty_u16(0); IN7.duty_u16(0); IN8.duty_u16(0)
+
+def frente():
+    IN1.duty_u16(velocidade); IN2.duty_u16(0)
+    IN3.duty_u16(velocidade); IN4.duty_u16(0)
+    IN5.duty_u16(velocidade); IN6.duty_u16(0)
+    IN7.duty_u16(velocidade); IN8.duty_u16(0)
+
+def tras():
+    IN1.duty_u16(0); IN2.duty_u16(velocidade)
+    IN3.duty_u16(0); IN4.duty_u16(velocidade)
+    IN5.duty_u16(0); IN6.duty_u16(velocidade)
+    IN7.duty_u16(0); IN8.duty_u16(velocidade)
+
+def esquerda():
+    IN1.duty_u16(0); IN2.duty_u16(velocidade)
+    IN3.duty_u16(velocidade); IN4.duty_u16(0)
+    IN5.duty_u16(velocidade); IN6.duty_u16(0)
+    IN7.duty_u16(0); IN8.duty_u16(velocidade)
+
+def direita():
+    IN1.duty_u16(velocidade); IN2.duty_u16(0)
+    IN3.duty_u16(0); IN4.duty_u16(velocidade)
+    IN5.duty_u16(0); IN6.duty_u16(velocidade)
+    IN7.duty_u16(velocidade); IN8.duty_u16(0)
+
+# Configuração do Ponto de Acesso Wi-Fi
 SSID = "Teste Robô ESP32"
 PASSWORD = "12349876"
 
-# Função para criar a página HTML
-def pagina_web():
-    html = """<!DOCTYPE html>
-<html>
-<head>
-    <title>Controle Robô ESP32</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f0f0f0;}
-        h1 { color: #333; }
-        .button-container { margin-top: 30px; }
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 10px;
-            cursor: pointer;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            transition: 0.3s;
-        }
-        button:hover { background-color: #45a049; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2); }
-        .btn-frente { background-color: #007bff;}
-        .btn-frente:hover { background-color: #0056b3;}
-        .btn-tras { background-color: #007bff;}
-        .btn-tras:hover { background-color: #0056b3;}
-        .btn-esquerda { background-color: #ffc107;}
-        .btn-esquerda:hover { background-color: #d39e00;}
-        .btn-direita { background-color: #ffc107;}
-        .btn-direita:hover { background-color: #d39e00;}
-        p { color: #555; font-size: 18px; }
-    </style>
-</head>
-<body>
-    <h1>Controle do Robô </h1>
-    <div class="button-container">
-        <button class="btn-frente" onmousedown="startCommand('frente')" onmouseup="stopCommand()" ontouchstart="startCommand('frente')" ontouchend="stopCommand()">Frente</button><br>
-        <button class="btn-esquerda" onmousedown="startCommand('esquerda')" onmouseup="stopCommand()" ontouchstart="startCommand('esquerda')" ontouchend="stopCommand()">Esquerda</button>
-        <button class="btn-direita" onmousedown="startCommand('direita')" onmouseup="stopCommand()" ontouchstart="startCommand('direita')" ontouchend="stopCommand()">Direita</button><br>
-        <button class="btn-tras" onmousedown="startCommand('tras')" onmouseup="stopCommand()" ontouchstart="startCommand('tras')" ontouchend="stopCommand()">Trás</button>
-    </div>
-    <p id="status">Comando: Nenhum</p>
-
-    <script>
-        var comandoInterval;
-        var chave = "SEGREDO123";  // Substitua pela sua chave real
-
-        function startCommand(direction) {
-            document.getElementById('status').innerText = "Comando: " + direction.charAt(0).toUpperCase() + direction.slice(1);
-            clearInterval(comandoInterval);
-            comandoInterval = setInterval(function() {
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "/comando?dir=" + direction + "&chave=" + chave, true);
-                xhr.send();
-            }, 200);
-        }
-
-        function stopCommand() {
-            clearInterval(comandoInterval);
-            document.getElementById('status').innerText = "Comando: Nenhum";
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/comando?dir=parar&chave=" + chave, true);
-            xhr.send();
-        }
-    </script>
-</body>
-</html>
-"""
-    return html
-
-# Configuração do Ponto de Acesso
 ap = network.WLAN(network.AP_IF)
 ap.active(True)
-ap.config(essid=SSID, password=PASSWORD, authmode =3)
+ap.config(essid=SSID, password=PASSWORD, authmode=3)
 
 while not ap.active():
     pass
@@ -94,61 +64,66 @@ print("Ponto de acesso Wi-Fi ativado!")
 print(f"Conecte-se à rede: {SSID}")
 print(f"IP do ESP32: {ap.ifconfig()[0]}")
 
-# Configuração do Socket para o servidor web
+# HTML da interface
+
+def pagina_web():
+    return """<!DOCTYPE html>
+<html>
+<head><title>Controle Robô ESP32</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    button { padding: 15px 30px; margin: 10px; font-size: 16px; }
+</style>
+</head>
+<body>
+    <h1>Controle do Robô 🤖</h1>
+    <button onclick=\"enviar('frente')\">Frente</button><br>
+    <button onclick=\"enviar('esquerda')\">Esquerda</button>
+    <button onclick=\"enviar('direita')\">Direita</button><br>
+    <button onclick=\"enviar('tras')\">Trás</button>
+    <button onclick=\"enviar('parar')\">Parar</button>
+    <script>
+        function enviar(cmd) {
+            fetch('/comando?dir=' + cmd);
+        }
+    </script>
+</body>
+</html>
+"""
+
+# Servidor Web
 addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
 s = socket.socket()
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Permite reusar o endereço
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind(addr)
-s.listen(5) # Espera até 5 conexões
+s.listen(5)
 
-print("Servidor web escutando na porta 80...")
+print("Servidor Web iniciado!")
 
 while True:
     try:
-        cl, addr_cl = s.accept()
-        print(f"Cliente conectado de: {addr_cl}")
-        request = cl.recv(1024)
-        request_str = request.decode('utf-8')
-        # print("Conteúdo da Requisição:") # Descomente para depuração
-        # print(request_str) # Descomente para depuração
+        cl, addr = s.accept()
+        print(f"Cliente conectado: {addr}")
+        request = cl.recv(1024).decode()
 
-        comando = None
-        if "/comando?dir=frente" in request_str:
-            comando = "Frente"
-        elif "/comando?dir=tras" in request_str:
-            comando = "Trás"
-        elif "/comando?dir=esquerda" in request_str:
-            comando = "Esquerda"
-        elif "/comando?dir=direita" in request_str:
-            comando = "Direita"
+        if '/comando?dir=frente' in request:
+            frente()
+        elif '/comando?dir=tras' in request:
+            tras()
+        elif '/comando?dir=esquerda' in request:
+            esquerda()
+        elif '/comando?dir=direita' in request:
+            direita()
+        elif '/comando?dir=parar' in request:
+            parar()
 
-        if comando:
-            print(f"Botão {comando} Pressionado!")
-            # Aqui você adicionaria a lógica para controlar os motores do robô
-            # Exemplo:
-            # if comando == "Frente":
-            #     motor_frente()
-            # elif comando == "Trás":
-            #     motor_tras()
-            # ... e assim por diante
-
-        # Envia a página HTML como resposta
         cl.send('HTTP/1.1 200 OK\n')
         cl.send('Content-Type: text/html\n')
         cl.send('Connection: close\n\n')
         cl.sendall(pagina_web())
         cl.close()
-        print(f"Cliente {addr_cl} desconectado.")
 
-    except OSError as e:
-        cl.close()
-        print(f"Erro de conexão ou socket: {e}")
-    except KeyboardInterrupt:
-        print("Servidor encerrado.")
-        s.close()
-        ap.active(False)
-        break
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
-        if 'cl' in locals() and cl: # Garante que cl existe e está aberto antes de tentar fechar
-            cl.close()
+        print(f"Erro: {e}")
+        cl.close()
