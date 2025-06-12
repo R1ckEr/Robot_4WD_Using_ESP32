@@ -5,49 +5,58 @@ import time
 from machine import Pin, PWM
 
 # Velocidade padrão (0 a 65535)
-velocidade = 30000
+velocidade_padrao = 30000
 
 # Pinos dos motores com PWM (conforme tabela)
 # Ponte H 1
-IN1 = PWM(Pin(25), freq=1000)  # Motor A1
-IN2 = PWM(Pin(26), freq=1000)
-IN3 = PWM(Pin(27), freq=1000)  # Motor A2
-IN4 = PWM(Pin(13), freq=1000)
+direita_traseira_frente = PWM(Pin(25), freq=1000)  # Motor A1
+direita_traseira_tras = PWM(Pin(26), freq=1000)
+esquerda_tras = PWM(Pin(27), freq=1000)  # Motor A2
+esquerda_frente = PWM(Pin(13), freq=1000)
 # Ponte H 2
-IN5 = PWM(Pin(18), freq=1000)  # Motor B1
-IN6 = PWM(Pin(19), freq=1000)
-IN7 = PWM(Pin(21), freq=1000)  # Motor B2
-IN8 = PWM(Pin(22), freq=1000)
+esquerda_traseira_frente = PWM(Pin(18), freq=1000)  # Motor B1
+esquerda_traseira_tras = PWM(Pin(19), freq=1000)
+direita_frente = PWM(Pin(21), freq=1000)  # Motor B2
+direita_tras = PWM(Pin(22), freq=1000)
 
 # Funções de controle de movimento
 
 def parar():
-    IN1.duty_u16(0); IN2.duty_u16(0); IN3.duty_u16(0); IN4.duty_u16(0)
-    IN5.duty_u16(0); IN6.duty_u16(0); IN7.duty_u16(0); IN8.duty_u16(0)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(0)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(0)
 
 def frente():
-    IN1.duty_u16(velocidade); IN2.duty_u16(0)
-    IN3.duty_u16(velocidade); IN4.duty_u16(0)
-    IN5.duty_u16(velocidade); IN6.duty_u16(0)
-    IN7.duty_u16(velocidade); IN8.duty_u16(0)
+    direita_frente.duty_u16(velocidade_padrao); direita_tras.duty_u16(0)
+    esquerda_frente.duty_u16(velocidade_padrao); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_padrao); esquerda_traseira_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_padrao); direita_traseira_tras.duty_u16(0)
 
 def tras():
-    IN1.duty_u16(0); IN2.duty_u16(velocidade)
-    IN3.duty_u16(0); IN4.duty_u16(velocidade)
-    IN5.duty_u16(0); IN6.duty_u16(velocidade)
-    IN7.duty_u16(0); IN8.duty_u16(velocidade)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_padrao)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_padrao)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_padrao)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_padrao)
 
 def esquerda():
-    IN1.duty_u16(0); IN2.duty_u16(velocidade)
-    IN3.duty_u16(velocidade); IN4.duty_u16(0)
-    IN5.duty_u16(velocidade); IN6.duty_u16(0)
-    IN7.duty_u16(0); IN8.duty_u16(velocidade)
+    # Lado direito (IN1, IN7) anda para frente
+    direita_frente.duty_u16(velocidade_padrao); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_padrao); direita_traseira_tras.duty_u16(0)
+    #Lado esquerdo frontal (N3) fica parado
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(0)
+    # Lado esquerdo (IN5) anda para trás
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_padrao)
 
 def direita():
-    IN1.duty_u16(velocidade); IN2.duty_u16(0)
-    IN3.duty_u16(0); IN4.duty_u16(velocidade)
-    IN5.duty_u16(0); IN6.duty_u16(velocidade)
-    IN7.duty_u16(velocidade); IN8.duty_u16(0)
+    # Lado esquerdo (IN3 e IN5) anda para frente
+    esquerda_frente.duty_u16(velocidade_padrao); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_padrao); esquerda_traseira_tras.duty_u16(0)
+
+    # Lado direito traseiro (IN7) anda para trás
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_padrao)
+    # Lado direito frontal (IN1) fica parado
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(0)
 
 # Configuração do Ponto de Acesso Wi-Fi
 SSID = "Teste Robô ESP32"
