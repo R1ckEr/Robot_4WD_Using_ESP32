@@ -6,6 +6,7 @@ from machine import Pin, PWM
 
 # Velocidade padrão (0 a 65535)
 velocidade_padrao = 30000
+velocidade_curva = 45000
 
 # Pinos dos motores com PWM (conforme tabela)
 # Ponte H 1
@@ -41,22 +42,22 @@ def tras():
 
 def esquerda():
     # Lado direito (IN1, IN7) anda para frente
-    direita_frente.duty_u16(velocidade_padrao); direita_tras.duty_u16(0)
-    direita_traseira_frente.duty_u16(velocidade_padrao); direita_traseira_tras.duty_u16(0)
-    #Lado esquerdo frontal (N3) fica parado
-    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(0)
+    direita_frente.duty_u16(velocidade_curva); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_curva); direita_traseira_tras.duty_u16(0)
+    #Lado esquerdo frontal (N3) para trás
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_padrao)
     # Lado esquerdo (IN5) anda para trás
     esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_padrao)
 
 def direita():
     # Lado esquerdo (IN3 e IN5) anda para frente
-    esquerda_frente.duty_u16(velocidade_padrao); esquerda_tras.duty_u16(0)
-    esquerda_traseira_frente.duty_u16(velocidade_padrao); esquerda_traseira_tras.duty_u16(0)
+    esquerda_frente.duty_u16(velocidade_curva); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_curva); esquerda_traseira_tras.duty_u16(0)
 
     # Lado direito traseiro (IN7) anda para trás
     direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_padrao)
-    # Lado direito frontal (IN1) fica parado
-    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(0)
+    # Lado direito frontal (IN1) para tras
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_padrao)
 
 # Configuração do Ponto de Acesso Wi-Fi
 SSID = "Teste Robô ESP32"
@@ -134,5 +135,7 @@ while True:
         cl.close()
 
     except Exception as e:
+        print(f"Erro: {e}")
+        cl.close()
         print(f"Erro: {e}")
         cl.close()
