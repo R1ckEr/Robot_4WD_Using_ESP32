@@ -25,26 +25,6 @@ sensor_centro_esquerdo = Pin(35, Pin.IN)
 sensor_centro_direito = Pin(32, Pin.IN)
 sensor_direito = Pin(33, Pin.IN)
 
-# Sensor Ultrassônico
-trig = Pin(12, Pin.OUT)
-echo = Pin(14, Pin.IN)
-
-def medir_distancia():
-    trig.value(0)
-    time.sleep_us(2)
-    trig.value(1)
-    time.sleep_us(10)
-    trig.value(0)
-
-    while echo.value() == 0:
-        sinal_inicio = time.ticks_us()
-    while echo.value() == 1:
-        sinal_fim = time.ticks_us()
-
-    duracao = time.ticks_diff(sinal_fim, sinal_inicio)
-    distancia = (duracao * 0.0343) / 2
-    return distancia
-
 # Funções de controle de movimento
 
 def parar():
@@ -94,16 +74,6 @@ marcacao_contador = 0
 ultimo_tempo_marcacao = 0
 
 while True:
-    distancia = medir_distancia()
-    if distancia < 15:
-        parar()
-        time.sleep(0.5)
-        tras()
-        time.sleep(0.7)
-        parar()
-        time.sleep(0.5)
-        continue
-
     E = sensor_esquerdo.value()
     CE = sensor_centro_esquerdo.value()
     CD = sensor_centro_direito.value()
