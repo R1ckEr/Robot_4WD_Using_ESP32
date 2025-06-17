@@ -5,7 +5,6 @@ import time
 # Velocidade padrão (0 a 65535)
 velocidade_padrao = 30000
 velocidade_curva_leve = 35000
-velocidade_curva_aguda = 45000
 
 # Pinos dos motores com PWM (conforme tabela)
 # Ponte H 1
@@ -48,26 +47,14 @@ def tras():
 def esquerda_leve():
     direita_frente.duty_u16(velocidade_curva_leve); direita_tras.duty_u16(0)
     direita_traseira_frente.duty_u16(velocidade_curva_leve); direita_traseira_tras.duty_u16(0)
-    esquerda_frente.duty_u16(velocidade_padrao // 2); esquerda_tras.duty_u16(0)
-    esquerda_traseira_frente.duty_u16(velocidade_padrao // 2); esquerda_traseira_tras.duty_u16(0)
-
-def esquerda_aguda():
-    direita_frente.duty_u16(velocidade_curva_aguda); direita_tras.duty_u16(0)
-    direita_traseira_frente.duty_u16(velocidade_curva_aguda); direita_traseira_tras.duty_u16(0)
-    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_curva_aguda)
-    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_curva_aguda)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(0)
 
 def direita_leve():
     esquerda_frente.duty_u16(velocidade_curva_leve); esquerda_tras.duty_u16(0)
     esquerda_traseira_frente.duty_u16(velocidade_curva_leve); esquerda_traseira_tras.duty_u16(0)
-    direita_frente.duty_u16(velocidade_padrao // 2); direita_tras.duty_u16(0)
-    direita_traseira_frente.duty_u16(velocidade_padrao // 2); direita_traseira_tras.duty_u16(0)
-
-def direita_aguda():
-    esquerda_frente.duty_u16(velocidade_curva_aguda); esquerda_tras.duty_u16(0)
-    esquerda_traseira_frente.duty_u16(velocidade_curva_aguda); esquerda_traseira_tras.duty_u16(0)
-    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_curva_aguda)
-    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_curva_aguda)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(0)
 
 # Loop principal para seguir linha
 marcacao_contador = 0
@@ -92,18 +79,12 @@ while True:
         continue
 
     # Lógica de decisão refinada
-    if CE == 0 and CD == 0 and E == 1 and D == 1:
+    if CE == 0 and CD == 0 and E == 0 and D == 0:
         frente()
     elif CE == 0 and CD == 1:
         esquerda_leve()
     elif CE == 1 and CD == 0:
         direita_leve()
-    elif E == 0 and CE == 1:
-        esquerda_aguda()
-    elif D == 0 and CD == 1:
-        direita_aguda()
-    elif E == 0 and D == 0:
-        parar()
     else:
         parar()
 
