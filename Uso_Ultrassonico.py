@@ -1,99 +1,126 @@
+# main.py
 from machine import Pin, PWM
 import time
 
-# Sensores infravermelhos
-IR_L = Pin(34, Pin.IN)   # Esquerda
-IR_CL = Pin(35, Pin.IN)  # Centro-Esquerda
-IR_CR = Pin(32, Pin.IN)  # Centro-Direita
-IR_R = Pin(33, Pin.IN)   # Direita
+# Velocidade padrão (0 a 65535)
+velocidade_padrao = 30000
+velocidade_curva_leve = 35000
+velocidade_curva_aguda = 45000
 
-# Pinos dos motores com PWM
+# Pinos dos motores com PWM (conforme tabela)
 # Ponte H 1
-IN1 = PWM(Pin(25), freq=1000)
-IN2 = PWM(Pin(26), freq=1000)
-IN3 = PWM(Pin(27), freq=1000)
-IN4 = PWM(Pin(13), freq=1000)
+direita_traseira_frente = PWM(Pin(25), freq=1000)  # Motor A1
+direita_traseira_tras = PWM(Pin(26), freq=1000)
+esquerda_tras = PWM(Pin(27), freq=1000)  # Motor A2
+esquerda_frente = PWM(Pin(13), freq=1000)
 # Ponte H 2
-IN5 = PWM(Pin(18), freq=1000)
-IN6 = PWM(Pin(19), freq=1000)
-IN7 = PWM(Pin(21), freq=1000)
-IN8 = PWM(Pin(22), freq=1000)
+esquerda_traseira_frente = PWM(Pin(18), freq=1000)  # Motor B1
+esquerda_traseira_tras = PWM(Pin(19), freq=1000)
+direita_frente = PWM(Pin(21), freq=1000)  # Motor B2
+direita_tras = PWM(Pin(22), freq=1000)
 
-# Velocidade base
-VEL_BASE = 30000
-VEL_CURVA = 15000  # velocidade reduzida para o lado interno da curva
+# Sensores infravermelhos
+sensor_esquerdo = Pin(34, Pin.IN)
+sensor_centro_esquerdo = Pin(35, Pin.IN)
+sensor_centro_direito = Pin(32, Pin.IN)
+sensor_direito = Pin(33, Pin.IN)
 
-# Movimento dos motores com controle individual
-def mover_motor_esquerdo(frente, velocidade):
-    if frente:
-        IN1.duty_u16(velocidade)
-        IN2.duty_u16(0)
-        IN3.duty_u16(velocidade)
-        IN4.duty_u16(0)
-    else:
-        IN1.duty_u16(0)
-        IN2.duty_u16(velocidade)
-        IN3.duty_u16(0)
-        IN4.duty_u16(velocidade)
+# Sensor Ultrassônico
+trig = Pin(12, Pin.OUT)
+echo = Pin(14, Pin.IN)
 
-def mover_motor_direito(frente, velocidade):
-    if frente:
-        IN5.duty_u16(velocidade)
-        IN6.duty_u16(0)
-        IN7.duty_u16(velocidade)
-        IN8.duty_u16(0)
-    else:
-        IN5.duty_u16(0)
-        IN6.duty_u16(velocidade)
-        IN7.duty_u16(0)
-        IN8.duty_u16(velocidade)
+def medir_distancia():
+    trig.value(0)
+    time.sleep_us(2)
+    trig.value(1)
+    time.sleep_us(10)
+    trig.value(0)
+
+    while echo.value() == 0:
+        sinal_inicio = time.ticks_us()
+    while echo.value() == 1:
+        sinal_fim = time.ticks_us()
+
+    duracao = time.ticks_diff(sinal_fim, sinal_inicio)
+    distancia = (duracao * 0.0343) / 2
+    return distancia
+
+# Funções de controle de movimento
 
 def parar():
-    for motor in [IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8]:
-        motor.duty_u16(0)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(0)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(0)
 
-# Função principal de seguidor de linha
-def seguir_linha():
-    while True:
-        # Leitura dos sensores (0 = linha preta)
-        L = not IR_L.value()
-        CL = not IR_CL.value()
-        CR = not IR_CR.value()
-        R = not IR_R.value()
+def frente():
+    direita_frente.duty_u16(velocidade_padrao); direita_tras.duty_u16(0)
+    esquerda_frente.duty_u16(velocidade_padrao); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_padrao); esquerda_traseira_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_padrao); direita_traseira_tras.duty_u16(0)
 
-        # Curvas leves e suaves com controle proporcional simplificado
-        if CL and CR and not L and not R:
-            # Centro: em linha reta
-            mover_motor_esquerdo(True, VEL_BASE)
-            mover_motor_direito(True, VEL_BASE)
+def tras():
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_padrao)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_padrao)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_padrao)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_padrao)
 
-        elif CL and not CR:
-            # Leve curva para direita
-            mover_motor_esquerdo(True, VEL_BASE)
-            mover_motor_direito(True, VEL_CURVA)
+def esquerda_leve():
+    direita_frente.duty_u16(velocidade_curva_leve); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_curva_leve); direita_traseira_tras.duty_u16(0)
+    esquerda_frente.duty_u16(velocidade_padrao // 2); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_padrao // 2); esquerda_traseira_tras.duty_u16(0)
 
-        elif CR and not CL:
-            # Leve curva para esquerda
-            mover_motor_esquerdo(True, VEL_CURVA)
-            mover_motor_direito(True, VEL_BASE)
+def esquerda_aguda():
+    direita_frente.duty_u16(velocidade_curva_aguda); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_curva_aguda); direita_traseira_tras.duty_u16(0)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_curva_aguda)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_curva_aguda)
 
-        elif L:
-            # Curva forte para esquerda
-            mover_motor_esquerdo(True, VEL_CURVA)
-            mover_motor_direito(True, int(VEL_BASE * 1.2))
+def direita_leve():
+    esquerda_frente.duty_u16(velocidade_curva_leve); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_curva_leve); esquerda_traseira_tras.duty_u16(0)
+    direita_frente.duty_u16(velocidade_padrao // 2); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_padrao // 2); direita_traseira_tras.duty_u16(0)
 
-        elif R:
-            # Curva forte para direita
-            mover_motor_esquerdo(True, int(VEL_BASE * 1.2))
-            mover_motor_direito(True, VEL_CURVA)
+def direita_aguda():
+    esquerda_frente.duty_u16(velocidade_curva_aguda); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_curva_aguda); esquerda_traseira_tras.duty_u16(0)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_curva_aguda)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_curva_aguda)
 
-        elif not (L or CL or CR or R):
-            # Fora da linha - procurar a linha
-            mover_motor_esquerdo(False, VEL_CURVA)
-            mover_motor_direito(True, VEL_CURVA)
+# Loop principal para seguir linha
+while True:
+    distancia = medir_distancia()
+    if distancia < 15:
+        parar()
+        time.sleep(0.5)
+        tras()
+        time.sleep(0.7)
+        parar()
+        time.sleep(0.5)
+        continue
 
-        else:
-            # Situação indefinida - parar
-            parar()
+    E = sensor_esquerdo.value()
+    CE = sensor_centro_esquerdo.value()
+    CD = sensor_centro_direito.value()
+    D = sensor_direito.value()
 
-        time.sleep(0.01)  # Delay curto para fluidez
+    # Lógica de decisão refinada
+    if CE == 0 and CD == 0 and E == 1 and D == 1:
+        frente()
+    elif CE == 0 and CD == 1:
+        esquerda_leve()
+    elif CE == 1 and CD == 0:
+        direita_leve()
+    elif E == 0 and CE == 1:
+        esquerda_aguda()
+    elif D == 0 and CD == 1:
+        direita_aguda()
+    elif E == 0 and D == 0:
+        parar()
+    else:
+        parar()
+
+    time.sleep(0.05)
+
