@@ -78,15 +78,15 @@ while True:
     DP = sensor_direito.value()
     
     
-    elif EP == 1 and CE == 0 and CD == 0 and DP == 0:
+    if EP == 1 and CE == 0 and CD == 0 and DP == 0:
         esquerda_corretivo()
     elif EP == 0 and CE == 0 and CD == 0 and DP == 1:
         direita_corretivo()
-    if CE == 0 and CD == 0:
+    elif CE == 0 and CD == 0 and EP == 0 and DP == 0:
         frente()
-    elif CE == 1 and CD == 0:
+    elif CE == 1 and CD == 0 and EP == 0 and DP == 0:
         esquerda_leve()
-    elif CE == 0 and CD == 1:
+    elif CE == 0 and CD == 1 and EP == 0 and DP == 0:
         direita_leve()
     else:
         parar()
