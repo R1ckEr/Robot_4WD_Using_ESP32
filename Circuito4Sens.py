@@ -3,9 +3,10 @@ from machine import Pin, PWM
 import time
 
 # Velocidade padrão (0 a 65535)
-velocidade_padrao = 30000
-velocidade_curva_leve = 35000
-velocidade_curva_aguda = 45000
+velocidade_padrao =25000
+velocidade_curva_leve = 50000
+velocidade_correcao_forte = 55000
+velocidade_correcao_fraca = 17000
 
 # Pinos dos motores com PWM (conforme tabela)
 # Ponte H 1
@@ -48,63 +49,46 @@ def tras():
 def esquerda_leve():
     direita_frente.duty_u16(velocidade_curva_leve); direita_tras.duty_u16(0)
     direita_traseira_frente.duty_u16(velocidade_curva_leve); direita_traseira_tras.duty_u16(0)
-    esquerda_frente.duty_u16(velocidade_padrao // 2); esquerda_tras.duty_u16(0)
-    esquerda_traseira_frente.duty_u16(velocidade_padrao // 2); esquerda_traseira_tras.duty_u16(0)
-
-def esquerda_aguda():
-    direita_frente.duty_u16(velocidade_curva_aguda); direita_tras.duty_u16(0)
-    direita_traseira_frente.duty_u16(velocidade_curva_aguda); direita_traseira_tras.duty_u16(0)
-    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_curva_aguda)
-    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_curva_aguda)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_padrao)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_padrao)
 
 def direita_leve():
     esquerda_frente.duty_u16(velocidade_curva_leve); esquerda_tras.duty_u16(0)
     esquerda_traseira_frente.duty_u16(velocidade_curva_leve); esquerda_traseira_tras.duty_u16(0)
-    direita_frente.duty_u16(velocidade_padrao // 2); direita_tras.duty_u16(0)
-    direita_traseira_frente.duty_u16(velocidade_padrao // 2); direita_traseira_tras.duty_u16(0)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_padrao)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_padrao)
 
-def direita_aguda():
-    esquerda_frente.duty_u16(velocidade_curva_aguda); esquerda_tras.duty_u16(0)
-    esquerda_traseira_frente.duty_u16(velocidade_curva_aguda); esquerda_traseira_tras.duty_u16(0)
-    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_curva_aguda)
-    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_curva_aguda)
+def esquerda_corretivo():
+    direita_frente.duty_u16(velocidade_correcao_forte); direita_tras.duty_u16(0)
+    direita_traseira_frente.duty_u16(velocidade_correcao_forte); direita_traseira_tras.duty_u16(0)
+    esquerda_frente.duty_u16(0); esquerda_tras.duty_u16(velocidade_correcao_fraca)
+    esquerda_traseira_frente.duty_u16(0); esquerda_traseira_tras.duty_u16(velocidade_correcao_fraca)
 
-# Loop principal para seguir linha
-marcacao_contador = 0
-ultimo_tempo_marcacao = 0
-
-while True:
-    E = sensor_esquerdo.value()
-    CE = sensor_centro_esquerdo.value()
-    CD = sensor_centro_direito.value()
-    D = sensor_direito.value()
-
-    # Detecção de marcação especial "C|Ↄ" (todos os sensores no preto)
-    if E == 0 and CE == 0 and CD == 0 and D == 0:
-        if time.ticks_diff(time.ticks_ms(), ultimo_tempo_marcacao) > 1000:
-            marcacao_contador += 1
-            ultimo_tempo_marcacao = time.ticks_ms()
-            # continua andando por um breve tempo antes de qualquer ação futura
-            frente()
-            time.sleep(0.5)
-            parar()
-            time.sleep(0.5)
-        continue
+def direita_corretivo():
+    esquerda_frente.duty_u16(velocidade_correcao_forte); esquerda_tras.duty_u16(0)
+    esquerda_traseira_frente.duty_u16(velocidade_correcao_forte); esquerda_traseira_tras.duty_u16(0)
+    direita_frente.duty_u16(0); direita_tras.duty_u16(velocidade_correcao_fraca)
+    direita_traseira_frente.duty_u16(0); direita_traseira_tras.duty_u16(velocidade_correcao_fraca)
 
     # Lógica de decisão refinada
-    if CE == 1 and CD == 1 and E == 0 and D == 0:
+while True:    
+    CE = sensor_centro_esquerdo.value()
+    CD = sensor_centro_direito.value()
+    EP = sensor_esquerdo.value()
+    DP = sensor_direito.value()
+    
+    
+    elif EP == 1 and CE == 0 and CD == 0 and DP == 0:
+        esquerda_corretivo()
+    elif EP == 0 and CE == 0 and CD == 0 and DP == 1:
+        direita_corretivo()
+    if CE == 0 and CD == 0:
         frente()
     elif CE == 1 and CD == 0:
         esquerda_leve()
     elif CE == 0 and CD == 1:
         direita_leve()
-    elif E == 0 and CE == 1:
-        esquerda_aguda()
-    elif D == 0 and CD == 1:
-        direita_aguda()
-    elif E == 0 and D == 0:
-        parar()
     else:
         parar()
 
-    time.sleep(0.05)
+    time.sleep(0.1)
