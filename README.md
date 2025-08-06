@@ -41,40 +41,54 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 
 ---
 
-## ⚙️ Pinagem Utilizada
+## 🔌 Pinagem dos Componentes
 
-### ✅ Sensores Infravermelhos (versão completa):
-| Sensor            | Pino ESP32 |
-|-------------------|------------|
-| Esquerdo          | GPIO 34    |
-| Centro-Esquerdo   | GPIO 35    |
-| Centro-Direito    | GPIO 32    |
-| Direito           | GPIO 33    |
+### 🔧 **Motores com PWM (Ponte H L298N)**
+
+| Função                         | GPIO (ESP32) | Ponte H              |
+|--------------------------------|--------------|----------------------|
+| Motor Direito Traseiro Frente  | GPIO 25      | Ponte H 1 - Motor A1 |
+| Motor Direito Traseiro Ré      | GPIO 26      | Ponte H 1 - Motor A1 |
+| Motor Esquerdo Traseiro Ré     | GPIO 27      | Ponte H 1 - Motor A2 |
+| Motor Esquerdo Traseiro Frente | GPIO 13      | Ponte H 1 - Motor A2 |
+| Motor Esquerdo Frontal Frente  | GPIO 18      | Ponte H 2 - Motor B1 |
+| Motor Esquerdo Frontal Ré      | GPIO 19      | Ponte H 2 - Motor B1 |
+| Motor Direito Frontal Frente   | GPIO 21      | Ponte H 2 - Motor B2 |
+| Motor Direito Frontal Ré       | GPIO 22      | Ponte H 2 - Motor B2 |
+
+> PWM com frequência de **1000 Hz**.
+
+---
+
+### 👀 **Sensores Infravermelhos**
+
+| Sensor                     | GPIO (ESP32) |
+|----------------------------|--------------|
+| Sensor IR Esquerdo         | GPIO 34      |
+| Sensor IR Centro-Esquerdo  | GPIO 35      |
+| Sensor IR Centro-Direito   | GPIO 32      |
+| Sensor IR Direito          | GPIO 33      |
 
 ---
 
-### 🌐 Sensor Ultrassônico (HC-SR04):
-| Função                   | Pino ESP32 |
-|--------------------------|------------|
-| TRIG                     | GPIO 12    |
-| ECHO                     | GPIO 14    |
+### 📡 **Sensor Ultrassônico (HC-SR04)**
+
+| Função     | GPIO (ESP32) |
+|------------|--------------|
+| TRIG       | GPIO 12      |
+| ECHO       | GPIO 14      |
 
 ---
 
-### 🔌 Ponte H L298N - Motores (com 2 L298N)
+## 🔋 Alimentação
 
-| Função                           | Pino ESP32 | Ponte H |
-|----------------------------------|------------|----------|
-| IN1 (Motor Esquerdo)             | GPIO 27    | Ponte A |
-| IN2 (Motor Esquerdo)             | GPIO 26    | Ponte A |
-| ENA (PWM - Motor Esquerdo)       | GPIO 25    | Ponte A |
-| IN3 (Motor Direito)              | GPIO 19    | Ponte B |
-| IN4 (Motor Direito)              | GPIO 18    | Ponte B |
-| ENB (PWM - Motor Direito)        | GPIO 5     | Ponte B |
-
-> As **duas pontes H** são utilizadas para maior estabilidade no controle dos motores, especialmente em condições de reversão e retomada.
+- 🔌 **Fonte**: 8 pilhas AAA (4 + 4 em série)
+- 🔧 **Regulador Buck**: ajustado para 7.5V na saída e conectado nas Pontes H
+- ⚠️ A alimentação do ESP32 e dos motores é separada, sendo o ESP32 alimentado com a saída **5V** de uma das **Pontes H**
+- Todos os GNDs interligados (ESP32, Buck e Pontes H)
 
 ---
+
 ## 🧠 Lógica de Funcionamento
 
 - O robô segue uma linha preta utilizando sensores IR.
@@ -87,15 +101,6 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 
 ---
 
-## 🚀 Instruções de Uso
-
-1. **Ajuste o Conversor DC/DC para ~7.5V** compensando a queda (~1.5V) nas pontes H.
-2. **Conecte os sensores** conforme o código que deseja usar.
-3. **Carregue o código no ESP32** com a IDE de sua preferência.
-4. **Coloque o robô no percurso** e energize o sistema.
-5. O robô seguirá automaticamente a linha.
-
----
 ## 📸 Imagens do Projeto
 
 ### Robô visto de cima
