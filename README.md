@@ -1,6 +1,7 @@
-# 🤖 Robô Seguidor de Linha com ESP32
+# 🤖 Robô Seguidor de Linha 4WD com ESP32
 
-Este projeto implementa um robô seguidor de linha utilizando a placa ESP32, sensores infravermelhos, controle PWM via duas pontes H (L298N) e, opcionalmente, sensor ultrassônico para detecção de obstáculos. O código foi desenvolvido para garantir movimentos precisos, suaves e adaptativos mesmo em curvas fechadas e marcações especiais no percurso.
+Este projeto implementa um robô seguidor de linha com tração nas quatro rodas, utilizando MicroPython em um ESP32. O sistema conta com sensores infravermelhos para detecção de linha, controle de motores via PWM com duas pontes H (L298N) e, opcionalmente, um sensor ultrassônico para detecção de obstáculos ao longo do trajeto.
+
 
 ---
 
@@ -9,8 +10,8 @@ Este projeto implementa um robô seguidor de linha utilizando a placa ESP32, sen
 O repositório contém **quatro códigos disponíveis**, para níveis distintos de precisão e simplicidade:
 
 - `Circuito2Sens.py`:  
-  Utiliza **apenas 2 sensores infravermelhos** (esquerdo e direito). Ideal para testes iniciais ou trajetos simples.  
-  **Menor precisão**, mas mais fácil de montar.
+  Utiliza **apenas 2 sensores infravermelhos** (esquerdo e direito). Ideal para trajetos simples.  
+  **Menor precisão**, porém mais fácil de montar.
 
 - `Circuito4Sens.py`:  
   Utiliza **4 sensores infravermelhos** (esquerdo, centro-esquerdo, centro-direito e direito).  
@@ -34,7 +35,7 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 | Sensor Ultrassônico HC-SR04        | 1 (opcional) | Detecta obstáculos à frente                            |
 | Motores DC 3V–6V                   | 4            | Movimentação do robô                                   |
 | Conversor DC/DC XL4015             | 1            | Alimentação dos motores, compensando queda nas pontes  |
-| 4 Rodas e Chassis                  | 1 conjunto   | Montagem do robô                                       |
+| 4 Rodas e Chassi                   | 1 conjunto   | Montagem do robô                                       |
 | Suporte 4 Pilhas AAA               | 2            | Suporte da Alimentação elétrica                        |
 | Pilhas AAA 1,5V                    | 8            | Alimentação elétrica do robô                           |
 | Mini Chave Gangorra - KCD11-101    | 1            | Liga/Desliga alimentação elétrica do robô              | 
@@ -55,8 +56,6 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 | Motor Esquerdo Frontal Ré      | GPIO 19      | Ponte H 2 - Motor B1 |
 | Motor Direito Frontal Frente   | GPIO 21      | Ponte H 2 - Motor B2 |
 | Motor Direito Frontal Ré       | GPIO 22      | Ponte H 2 - Motor B2 |
-
-> PWM com frequência de **1000 Hz**.
 
 ---
 
@@ -101,6 +100,26 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 
 ---
 
+## 🔌 Diagrama do Circuito
+
+O diagrama abaixo mostra todas as conexões elétricas realizadas no projeto, incluindo:
+
+- Alimentação via 8 pilhas AAA conectadas em série em um buck converter.
+- Conexão de todos os motores às duas pontes H.
+- Conexão elétrica dos sensores utilizados (exceto conexões lógicas)
+
+### 📷 Visualização:
+
+![Diagrama Completo](https://github.com/R1ckEr/Robot_4WD_Using_ESP32/blob/imagens/diagrama_completo.JPG)
+
+### 📂 Download do arquivo editável (.fzz):
+
+Você pode baixar o arquivo editável para abrir no Fritzing clicando abaixo:
+
+👉 [`diagrama.fzz`](https://github.com/R1ckEr/Robot_4WD_Using_ESP32/raw/imagens/diagrama.fzz)
+
+---
+
 ## 📸 Imagens do Projeto
 
 ### Robô visto de cima
@@ -109,10 +128,18 @@ O repositório contém **quatro códigos disponíveis**, para níveis distintos 
 ### Robô de frente
 ![Robô de frente](https://github.com/R1ckEr/Robot_4WD_Using_ESP32/blob/imagens/Robo_frente.jpg?raw=true)
 
-### Robô ligado e funcionando
+### Robô ligado
 ![Robô ligado](https://github.com/R1ckEr/Robot_4WD_Using_ESP32/blob/imagens/Robo_ligado.jpg?raw=true)
 
 ---
-## ✨ Créditos
+## 👥 Créditos
 
-Desenvolvido por **Ricardo Emanoel** como parte de um projeto IoT com ESP32.
+Projeto desenvolvido por:
+
+- [Ricardo Ribeiro](https://www.linkedin.com/in/rick-er/)
+- [Bruno Miam](https://www.linkedin.com/in/brunomiam/)
+- [Nathaly Vieira](https://www.linkedin.com/in/nathaly-r-vieira-15a554363/)
+- [Mayara Souza](https://www.linkedin.com/in/mayara-cssouza/)
+
+Este projeto foi desenvolvido como parte da nossa graduação em Defesa Cibernética, na disciplina de IoT, com foco em aplicações práticas de automação e robótica.
+
